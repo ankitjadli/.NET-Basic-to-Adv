@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -163,6 +164,40 @@ namespace Dashboard.Service
             deps.Min(x => x.ID);
             deps.Any(x => x.ID == 1);
             deps.All(x => x.ID == 1); // all elements should statisfy condition
+
+            //Group By and Join
+            DataTable customersTable = new DataTable("Customers");
+            customersTable.Columns.Add("CustomerID", typeof(int));
+            customersTable.Columns.Add("CustomerName", typeof(string));
+            customersTable.Columns.Add("Country", typeof(string));
+
+            customersTable.Rows.Add(1, "Alice", "USA");
+            customersTable.Rows.Add(2, "Bob", "Canada");
+            customersTable.Rows.Add(3, "Charlie", "USA");
+            customersTable.Rows.Add(4, "Ankit", "India");
+            customersTable.Rows.Add(5, "Nishant", "USA");
+
+            // Create Orders DataTable
+            DataTable ordersTable = new DataTable("Orders");
+            ordersTable.Columns.Add("OrderID", typeof(int));
+            ordersTable.Columns.Add("CustomerID", typeof(int));
+            ordersTable.Columns.Add("OrderAmount", typeof(decimal));
+            ordersTable.Columns.Add("OrderDate", typeof(DateTime));
+
+            ordersTable.Rows.Add(101, 1, 250.00m, new DateTime(2023, 9, 20));
+            ordersTable.Rows.Add(102, 2, 300.50m, new DateTime(2023, 9, 21));
+            ordersTable.Rows.Add(103, 1, 150.75m, new DateTime(2023, 9, 22));
+            ordersTable.Rows.Add(104, 3, 450.00m, new DateTime(2023, 9, 23));
+            ordersTable.Rows.Add(105, 2, 100.00m, new DateTime(2023, 9, 24));
+
+            var test = customersTable.AsEnumerable().GroupBy(x => x["Country"].ToString()).Select(y => new { KeyName = y.Key, Values = y.ToList() }).ToList();
+
+            var test2 = customersTable.AsEnumerable().Join(ordersTable.AsEnumerable(), c => c["CustomerID"].ToString(), o => o["CustomerID"].ToString(),
+                (c, o) => new {
+                    CustomerName = c["CustomerName"],
+                    OrderAmount = o["OrderAmount"]
+                }).ToList();
+
         }
     }
 
